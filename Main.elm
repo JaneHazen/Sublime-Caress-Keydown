@@ -4,67 +4,79 @@ import Html.Attributes exposing (..)
 import Random
 
 
-
-main =
-  Html.program
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
-    }
-
-
-
 -- MODEL
 
 
 type alias Model =
-  { color: Color
+  { textbox : List DivInfo
   }
 
-type alias Color =
-  { red : Int
-  , green : Int
-  , blue : Int
+type alias DivInfo =
+  { id: Int
+  , opacity: Bool
+  , content: String
   }
 
-black =
-  { red = 0, green = 0, blue = 0}
+type Msg
+  = NoOp
+  | CorrectAnswer Int
+
 
 defaultModel =
-  { color = black}
+  { textbox =
+    [{ id = 1
+    , opacity = True
+    , content = "Happiness is the longing for repetition"
+    }
+    , { id = 2
+    , opacity = True
+    , content = "Happiness is the longing for repetition"
+    }
+    , { id = 3
+    , opacity = True
+    , content = "Happiness is the longing for repetition"
+    }
+    , { id = 4
+    , opacity = True
+    , content = "Happiness is the longing for repetition"
+    }
+    , { id = 5
+    , opacity = True
+    , content = "Happiness is the longing for repetition"
+    }
+    , { id = 6
+    , opacity = True
+    , content = "Happiness is the longing for repetition"
+    }
+    , { id = 7
+    , opacity = True
+    , content = "Happiness is the longing for repetition"
+    }]
+  }
+
 
 init : (Model, Cmd Msg)
 init =
   (defaultModel, Cmd.none)
 
-makeColor: Int -> Int -> Int -> Color
-makeColor r g b =
-  { red = r, green = g, blue = b }
-
-colorGenerator : Random.Generator Color
-colorGenerator =
-    Random.map3 makeColor
-    (Random.int 0 255)
-    (Random.int 0 255)
-    (Random.int 0 255)
-
 -- UPDATE
+updateOpacity : DivInfo -> DivInfo -> Model
+updateOpacity textbox model =
+  List.indexedMap
+    (\ index divinfo ->
+      if divinfo.id == index then
+        {divinfo | opacity = False}
+      else
+        {divinfo | opacity = True}
+    ) model.textbox
 
-
-type Msg
-  = Roll
-  | NewFace Color
-
-
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Roll ->
-      (model, Random.generate NewFace colorGenerator)
-
-    NewFace newFace ->
-      (Model newFace, Cmd.none)
+    CorrectAnswer id ->
+      { model | textbox = updateOpacity }
+    _ ->
+    model
 
 
 
@@ -75,47 +87,32 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
 
+  --["{ opacity:.3; }", "{ opacity:1;}"]
 
 
 -- VIEW
 
 myStyle : String -> Attribute msg
-myStyle color =
-  style [ ("color", color) ]
+myStyle opacity =
+  style [ ("opacity", opacity) ]
 
-toCss : Color -> String
-toCss color =
-  "rgb(" ++ toString color.red
-  ++ "," ++ toString color.green
-  ++ "," ++ toString color.blue
-  ++ ")"
+toCss : DivInfo -> String
+toCss opacity =
+  if True
+  then ".3"
+  else
+    "1"
+
 
 view : Model -> Html Msg
 view model =
   div []
-    [ div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
-    , div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
-    , div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
-    , div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
-    , div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
-    , div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
-    , div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
-    , div []
-      [ h1 [  myStyle (toCss model.color) , onClick Roll ] [ text "Happiness is the longing for repitition" ]
-      ]
+    [ul [] (List.map viewDiv model.textbox )
     ]
+
+viewDiv : DivInfo -> Html Msg
+viewDiv textbox =
+       div []
+      [ h1 [  myStyle (toCss textbox) , onClick (CorrectAnswer textbox.id) ] [ text textbox.content ]
+      ]
 
