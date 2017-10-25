@@ -60,14 +60,14 @@ init =
   (defaultModel, Cmd.none)
 
 -- UPDATE
-updateOpacity : DivInfo -> DivInfo -> Model
+updateOpacity : DivInfo -> DivInfo -> Model -> DivInfo
 updateOpacity textbox model =
   List.indexedMap
     (\ index divinfo ->
       if divinfo.id == index then
-        {divinfo | opacity = False}
+        {divinfo | opacity = False, content = "Happiness is the longing for repetition"}
       else
-        {divinfo | opacity = True}
+        {divinfo | opacity = True, content = "Happiness is the longing for repetition"}
     ) model.textbox
 
 update : Msg -> Model -> Model
@@ -75,6 +75,7 @@ update msg model =
   case msg of
     CorrectAnswer id ->
       { model | textbox = updateOpacity }
+      model
     _ ->
     model
 
