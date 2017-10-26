@@ -1,86 +1,47 @@
+module Main exposing (..)
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
-import Random
+import List exposing (..)
 
 
 -- MODEL
-
+main : Program Never Model Msg
+main =
+  Html.program
+  { init = (init, Cmd.none)
+    ,view = view
+    , update = update
+    , subscriptions = \_ -> Sub.none
+  }
 
 type alias Model =
-  { textbox : List DivInfo
+  { content: String
+    , numberOfLines: Int
+    , selectedIndex: Int
   }
 
-type alias DivInfo =
-  { id: Int
-  , opacity: Bool
-  , content: String
-  }
 
 type Msg
   = NoOp
-  | CorrectAnswer Int
+  | SelectCorrectAnswer Int
 
-
-defaultModel =
-  { textbox =
-    [{ id = 1
-    , opacity = True
-    , content = "Happiness is the longing for repetition"
-    }
-    , { id = 2
-    , opacity = True
-    , content = "Happiness is the longing for repetition"
-    }
-    , { id = 3
-    , opacity = True
-    , content = "Happiness is the longing for repetition"
-    }
-    , { id = 4
-    , opacity = True
-    , content = "Happiness is the longing for repetition"
-    }
-    , { id = 5
-    , opacity = True
-    , content = "Happiness is the longing for repetition"
-    }
-    , { id = 6
-    , opacity = True
-    , content = "Happiness is the longing for repetition"
-    }
-    , { id = 7
-    , opacity = True
-    , content = "Happiness is the longing for repetition"
-    }]
+init: Model
+init =
+  { content = "Happiness is the longing for repetition"
+    , numberOfLines =  7
+    , selectedIndex = 0
   }
 
 
-init : (Model, Cmd Msg)
-init =
-  (defaultModel, Cmd.none)
-
--- UPDATE
-updateOpacity : DivInfo -> DivInfo -> Model -> DivInfo
-updateOpacity textbox model =
-  List.indexedMap
-    (\ index divinfo ->
-      if divinfo.id == index then
-        {divinfo | opacity = False, content = "Happiness is the longing for repetition"}
-      else
-        {divinfo | opacity = True, content = "Happiness is the longing for repetition"}
-    ) model.textbox
-
-update : Msg -> Model -> Model
+--UPDATE
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    CorrectAnswer id ->
-      { model | textbox = updateOpacity }
-      model
-    _ ->
-    model
-
-
-
+    NoOp ->
+      (model, Cmd.none)
+    SelectCorrectAnswer index ->
+      ({model | selectedIndex = index}, Cmd.none)
 -- SUBSCRIPTIONS
 
 
@@ -88,32 +49,33 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
 
-  --["{ opacity:.3; }", "{ opacity:1;}"]
 
 
 -- VIEW
-
-myStyle : String -> Attribute msg
-myStyle opacity =
-  style [ ("opacity", opacity) ]
-
-toCss : DivInfo -> String
-toCss opacity =
-  if True
-  then ".3"
-  else
-    "1"
 
 
 view : Model -> Html Msg
 view model =
   div []
-    [ul [] (List.map viewDiv model.textbox )
+    [ul [] (lines model)
     ]
 
-viewDiv : DivInfo -> Html Msg
-viewDiv textbox =
-       div []
-      [ h1 [  myStyle (toCss textbox) , onClick (CorrectAnswer textbox.id) ] [ text textbox.content ]
-      ]
+lines : Model -> List (Html Msg)
+lines {content, numberOfLines, selectedIndex} =
+    repeat numberOfLines 0.3
+    |> indexedMap (\index opacity ->
+        if index == selectedIndex then
+          (1.0, index)
+        else
+          (opacity, index)
+          )
+    |> List.map (contentListItem content)
 
+
+contentListItem : String -> ( Float, Int )  -> Html Msg
+contentListItem content ( opacity, index ) =
+      li
+        [ onClick (SelectCorrectAnswer index)
+        , style [ ("opacity", toString opacity) ]
+        ]
+        [ Html.text content ]
