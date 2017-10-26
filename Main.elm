@@ -6,7 +6,6 @@ import List exposing (..)
 
 
 -- MODEL
-
 main : Program Never Model Msg
 main =
   Html.program
@@ -35,7 +34,7 @@ init =
   }
 
 
-
+--UPDATE
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
@@ -80,5 +79,3 @@ contentListItem content ( opacity, index ) =
         , style [ ("opacity", toString opacity) ]
         ]
         [ Html.text content ]
-
-
